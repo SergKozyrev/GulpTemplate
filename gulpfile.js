@@ -14,19 +14,49 @@ let gulp = require('gulp'),
     uglify = require('gulp-uglify'), // Минификация javascript
     del = require('del'); // Очистка папки 
 
+// Пути к файлам
 
+let path = {
+    //Пути откуда брать исходники
+    src: {
+        html: 'src/*.html',
+        js: 'src/js/*.js',
+        style: 'src/sass/main.scss',
+        img: 'src/img/**/*.*',
+        fonts: 'src/fonts/**/*.*'
+    },
+
+    //Пути куда складывать готовые после сборки файлы
+    build: {
+        html: 'build/',
+        js: 'build/js/',
+        css: 'build/css/',
+        img: 'build/img/',
+        fonts: 'build/fonts/'
+    },
+
+    //Пути слежки за файлами
+    watch: {
+        html: 'src/**/*.html',
+        js: 'src/js/**/*.js',
+        style: 'src/sass/**/*.scss',
+        img: 'src/img/**/*.*',
+        fonts: 'src/fonts/**/*.*'
+    },
+    root: './'
+};
 // Работа с шрифтами
 
 function fonts() {
-    return gulp.src('./src/fonts/**/*.*')
+    return gulp.src(path.src.fonts)
         .pipe(plumber())
-        .pipe(gulp.dest('./build/fonts'))
+        .pipe(gulp.dest(path.build.fonts))
 }
 
 // Работа с изображениями
 
 function img() {
-    return gulp.src('src/img/**/*.*')
+    return gulp.src(path.src.img)
         .pipe(plumber())
         .pipe(cache('img'))
         .pipe(imagemin([
@@ -53,24 +83,24 @@ function img() {
         ], {
             verbose: true
         }))
-        .pipe(gulp.dest('build/img'))
+        .pipe(gulp.dest(path.build.img))
 }
 
 // Работа с html
 
 function html() {
-    return gulp.src('./src/*.html')
+    return gulp.src(path.src.html)
         .pipe(plumber())
         .pipe(fileinclude({
             prefix: '@@'
         }))
-        .pipe(gulp.dest('./'));
+        .pipe(gulp.dest(path.root));
 }
 
 // Работа со стилями
 
 function style() {
-    return gulp.src('./src/sass/**/*.scss')
+    return gulp.src(path.src.style)
         .pipe(plumber())
         .pipe(sourcemaps.init())
         .pipe(sass({
@@ -84,29 +114,29 @@ function style() {
             level: 2
         }))
         .pipe(sourcemaps.write())
-        .pipe(gulp.dest('./build/css'));
+        .pipe(gulp.dest(path.build.css));
 }
 
 // Работа с скриптами
 
 function script() {
-    return gulp.src('./src/js/**/*.js')
+    return gulp.src(path.src.js)
         .pipe(plumber())
         .pipe(concat('main.js'))
         .pipe(uglify({
             toplevel: true
         }))
-        .pipe(gulp.dest('./build/js'));
+        .pipe(gulp.dest(path.build.js));
 }
 
 // Слежка за изменениями
 
 function watch() {
-    gulp.watch('src/fonts/**/*.*', fonts);
-    gulp.watch('src/img/**/*.*', img);
-    gulp.watch('src/**/*.html', html);
-    gulp.watch('src/**/*.scss', style);
-    gulp.watch('src/js/**/*.js', script);
+    gulp.watch(path.watch.fonts, fonts);
+    gulp.watch(path.watch.img, img);
+    gulp.watch(path.watch.html, html);
+    gulp.watch(path.watch.style, style);
+    gulp.watch(path.watch.js, script);
 }
 
 // Очистка папки
