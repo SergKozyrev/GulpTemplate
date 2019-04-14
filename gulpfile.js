@@ -70,7 +70,7 @@ function html() {
 // Работа со стилями
 
 function style() {
-    return gulp.src('./src/scss/**/*.scss')
+    return gulp.src('./src/sass/**/*.scss')
         .pipe(plumber())
         .pipe(sourcemaps.init())
         .pipe(sass({
@@ -105,7 +105,7 @@ function watch() {
     gulp.watch('src/fonts/**/*.*', fonts);
     gulp.watch('src/img/**/*.*', img);
     gulp.watch('src/**/*.html', html);
-    gulp.watch('src/scss/**/*.scss', style);
+    gulp.watch('src/**/*.scss', style);
     gulp.watch('src/js/**/*.js', script);
 }
 
