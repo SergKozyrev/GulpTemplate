@@ -9,6 +9,7 @@ let gulp = require('gulp'),
     sourcemaps = require('gulp-sourcemaps'), // Карта стилей
     autoprefixer = require('gulp-autoprefixer'), // Расстановка префиксов
     shorthand = require('gulp-shorthand'), // Короткая запись стилей
+    gcmq = require('gulp-group-css-media-queries'), // Группировка медиа запросов
     cleanCSS = require('gulp-clean-css'), // Минификация css
     concat = require('gulp-concat'), // Обьединение файлов
     uglify = require('gulp-uglify'), // Минификация javascript
@@ -21,7 +22,7 @@ let path = {
     src: {
         html: 'src/*.html',
         js: 'src/js/*.js',
-        style: 'src/sass/main.scss',
+        style: 'src/sass/*.scss',
         img: 'src/img/**/*.*',
         fonts: 'src/fonts/**/*.*'
     },
@@ -102,14 +103,16 @@ function html() {
 function style() {
     return gulp.src(path.src.style)
         .pipe(plumber())
-        .pipe(sourcemaps.init())
-        .pipe(sass({
-            outputStyle: 'expanded'
-        }))
+        .pipe(gcmq())
         .pipe(shorthand())
         .pipe(autoprefixer({
             browsers: ['>0.1%']
         }))
+        .pipe(sourcemaps.init())
+        .pipe(sass({
+            outputStyle: 'expanded'
+        }))
+
         .pipe(cleanCSS({
             level: 2
         }))
