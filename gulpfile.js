@@ -103,16 +103,15 @@ function html() {
 function style() {
     return gulp.src(path.src.style)
         .pipe(plumber())
-        .pipe(gcmq())
-        .pipe(shorthand())
-        .pipe(autoprefixer({
-            browsers: ['>0.1%']
-        }))
         .pipe(sourcemaps.init())
         .pipe(sass({
             outputStyle: 'expanded'
         }))
-
+        .pipe(shorthand())
+        .pipe(autoprefixer({
+            browsers: ['>0.1%']
+        }))
+        .pipe(gcmq())
         .pipe(cleanCSS({
             level: 2
         }))
