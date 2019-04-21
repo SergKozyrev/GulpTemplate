@@ -11,7 +11,6 @@ let gulp = require('gulp'),
     shorthand = require('gulp-shorthand'), // Короткая запись стилей
     gcmq = require('gulp-group-css-media-queries'), // Группировка медиа запросов
     cleanCSS = require('gulp-clean-css'), // Минификация css
-    concat = require('gulp-concat'), // Обьединение файлов
     uglify = require('gulp-uglify'), // Минификация javascript
     del = require('del'); // Очистка папки 
 
@@ -20,16 +19,17 @@ let gulp = require('gulp'),
 let path = {
     //Пути откуда брать исходники
     src: {
-        html: 'src/*.html',
+        html: 'src/html/*.html',
         js: 'src/js/*.js',
         style: 'src/sass/*.scss',
         img: 'src/img/**/*.*',
-        fonts: 'src/fonts/**/*.*'
+        fonts: 'src/fonts/**/*.*',
+        css: 'build/css/*.css'
     },
 
     //Пути куда складывать готовые после сборки файлы
     build: {
-        html: 'build/',
+        html: './',
         js: 'build/js/',
         css: 'build/css/',
         img: 'build/img/',
@@ -43,8 +43,7 @@ let path = {
         style: 'src/sass/**/*.scss',
         img: 'src/img/**/*.*',
         fonts: 'src/fonts/**/*.*'
-    },
-    root: './'
+    }
 };
 // Работа с шрифтами
 
@@ -95,10 +94,10 @@ function html() {
         .pipe(fileinclude({
             prefix: '@@'
         }))
-        .pipe(gulp.dest(path.root));
+        .pipe(gulp.dest(path.build.html));
 }
 
-// Работа со стилями
+// Компиляция sass
 
 function style() {
     return gulp.src(path.src.style)
@@ -107,6 +106,14 @@ function style() {
         .pipe(sass({
             outputStyle: 'expanded'
         }))
+        .pipe(sourcemaps.write())
+        .pipe(gulp.dest(path.build.css));
+}
+// Минификация css
+
+function minify() {
+    return gulp.src(path.src.css)
+        .pipe(plumber())
         .pipe(shorthand())
         .pipe(autoprefixer({
             browsers: ['>0.1%']
@@ -115,16 +122,13 @@ function style() {
         .pipe(cleanCSS({
             level: 2
         }))
-        .pipe(sourcemaps.write())
         .pipe(gulp.dest(path.build.css));
 }
-
 // Работа с скриптами
 
 function script() {
     return gulp.src(path.src.js)
         .pipe(plumber())
-        .pipe(concat('main.js'))
         .pipe(uglify({
             toplevel: true
         }))
@@ -151,9 +155,10 @@ gulp.task("fonts", fonts); // Регистрация таска работы с 
 gulp.task("img", img); // Регистрация таска работы с изображениями
 gulp.task("html", html); // Регистрация таска работы с html
 gulp.task("style", style); // Регистрация таска работы со стилями
+gulp.task("minify", minify); // Минификация css
 gulp.task("script", script); // Регистрация таска работы с js 
 gulp.task("watch", watch); // Регистрация таска слежения за изменениями
 gulp.task("clean", clean); // Регистрация таска очистки папки
 
-gulp.task("build", gulp.series(clean, gulp.parallel(fonts, img, html, style, script))); // Таск для сборки всего проекта
+gulp.task("build", gulp.series(clean, gulp.parallel(fonts, img, html, gulp.series(style, minify), script))); // Таск для сборки всего проекта
 gulp.task("dev", gulp.series('build', 'watch')); // Таск при разработке
